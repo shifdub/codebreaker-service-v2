@@ -1,5 +1,6 @@
 package edu.cnm.deepdive.codebreaker.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,6 +20,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.lang.NonNull;
 
 @SuppressWarnings("JpaDataSourceORMInspection")
@@ -48,6 +50,7 @@ public class User {
 
   @NonNull
   @Column(nullable = false, updatable = false, unique = true)
+  @JsonIgnore
   private String oauthKey;
 
   @NonNull
@@ -63,17 +66,20 @@ public class User {
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "originator", cascade = CascadeType.ALL,
       orphanRemoval = true)
   @OrderBy("started DESC")
+  @JsonIgnore
   private final List<Match> matchesOriginated = new LinkedList<>();
 
   @NonNull
   @OneToMany(mappedBy = "winner", fetch = FetchType.LAZY,
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
   @OrderBy("deadline DESC")
+  @JsonIgnore
   private final List<Match> matchesWon = new LinkedList<>();
 
   @NonNull
   @ManyToMany(mappedBy = "players", fetch = FetchType.LAZY)
   @OrderBy("deadline DESC")
+  @JsonIgnore
   private final List<Match> matches = new LinkedList<>();
 
   @NonNull
