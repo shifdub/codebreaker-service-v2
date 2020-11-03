@@ -32,5 +32,8 @@ build/
 ### VS Code ###
 .vscode/
 
-# derby.log
+derby.log
 /codebreaker_db/
+
+.floo
+.flooignore
