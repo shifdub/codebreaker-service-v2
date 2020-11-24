@@ -1,13 +1,14 @@
 package edu.cnm.deepdive.codebreaker.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.net.URI;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import javax.persistence.CascadeType;
@@ -27,6 +28,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +42,8 @@ import org.springframework.stereotype.Component;
     name = "tournament",
     indexes = {
         @Index(columnList = "codeLength"),
-        @Index(columnList = "started,deadline")
+        @Index(columnList = "started,deadline"),
+        @Index(columnList = "pool")
     }
 )
 @JsonIgnoreProperties(
@@ -79,7 +82,7 @@ public class Match {
 
   @NonNull
   @Column(nullable = false, updatable = false)
-  private Criterion criterion;
+  private Criterion criterion = Criterion.GUESSES_TIME;
 
   @NonNull
   @Column(nullable = false, updatable = false)
@@ -97,16 +100,18 @@ public class Match {
   @NonNull
   @ManyToMany(fetch = FetchType.EAGER,
       cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-  @JoinTable(joinColumns = {@JoinColumn(name = "match_id")},
-      inverseJoinColumns = {@JoinColumn(name = "user_id")})
+  @JoinTable(name = "match_user",
+      joinColumns = {@JoinColumn(name = "match_id")},
+      inverseJoinColumns = {@JoinColumn(name = "user_id")},
+      uniqueConstraints = {@UniqueConstraint(columnNames = {"match_id", "user_id"})}
+  )
   @OrderBy("displayName ASC")
   private final List<User> players = new LinkedList<>();
 
   @NonNull
-  @OneToMany(mappedBy = "match", fetch = FetchType.LAZY,
+  @OneToMany(mappedBy = "match", fetch = FetchType.EAGER,
       cascade = CascadeType.ALL, orphanRemoval = true)
-  @JsonIgnore
-  private final List<Game> games = new LinkedList<>();
+  private final Set<Game> games = new LinkedHashSet<>();
 
   @NonNull
   public UUID getId() {
@@ -184,7 +189,7 @@ public class Match {
   }
 
   @NonNull
-  public List<Game> getGames() {
+  public Set<Game> getGames() {
     return games;
   }
 

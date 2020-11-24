@@ -2,20 +2,16 @@ package edu.cnm.deepdive.codebreaker.service;
 
 import edu.cnm.deepdive.codebreaker.model.dao.UserRepository;
 import edu.cnm.deepdive.codebreaker.model.entity.User;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class UserService implements Converter<Jwt, UsernamePasswordAuthenticationToken> {
+public class UserService {
 
   private final UserRepository repository;
 
@@ -39,16 +35,19 @@ public class UserService implements Converter<Jwt, UsernamePasswordAuthenticatio
         });
   }
 
-  @Override
-  public UsernamePasswordAuthenticationToken convert(Jwt jwt) {
-    Collection<SimpleGrantedAuthority> grants =
-        Collections.singleton(new SimpleGrantedAuthority("ROLE_USER"));
-    return new UsernamePasswordAuthenticationToken(
-        getOrCreate(jwt.getSubject(), jwt.getClaim("name")), jwt.getTokenValue(), grants);
-  }
-
   public Optional<User> getUser(UUID id) {
     return repository.findById(id);
   }
+
+  public static class UserNotFoundException extends ResponseStatusException {
+
+    private static final String NOT_FOUND_REASON = "User not found";
+
+    public UserNotFoundException() {
+      super(HttpStatus.NOT_FOUND, NOT_FOUND_REASON);
+    }
+
+  }
+
 
 }

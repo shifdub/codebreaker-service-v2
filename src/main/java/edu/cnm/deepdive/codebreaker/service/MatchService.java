@@ -4,12 +4,14 @@ import edu.cnm.deepdive.codebreaker.model.dao.MatchRepository;
 import edu.cnm.deepdive.codebreaker.model.entity.Game;
 import edu.cnm.deepdive.codebreaker.model.entity.Match;
 import edu.cnm.deepdive.codebreaker.model.entity.User;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class MatchService {
@@ -26,7 +28,7 @@ public class MatchService {
   public Match startMatch(Match match, User user) {
     char[] poolCharacters = match.getPool().toCharArray();
     match.setOriginator(user);
-    List<Game> games = match.getGames();
+    Set<Game> games = match.getGames();
     int codeLength = match.getCodeLength();
     StringBuilder builder = new StringBuilder(codeLength);
     for (int i = 0; i < match.getGameCount(); i++) {
@@ -46,9 +48,19 @@ public class MatchService {
     return matchRepository.findById(matchId);
   }
 
-  public Optional<List<Game>> getGames(UUID matchId) {
+  public Optional<Set<Game>> getGames(UUID matchId) {
     return get(matchId)
         .map(Match::getGames);
+  }
+
+  public static class MatchNotFoundException extends ResponseStatusException {
+
+    private static final String NOT_FOUND_REASON = "Match not found";
+
+    public MatchNotFoundException() {
+      super(HttpStatus.NOT_FOUND, NOT_FOUND_REASON);
+    }
+
   }
 
 }

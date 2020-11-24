@@ -1,9 +1,13 @@
 package edu.cnm.deepdive.codebreaker.controller;
 
+import static edu.cnm.deepdive.codebreaker.controller.BaseParameterPatterns.UUID_PATH_PARAMETER_PATTERN;
+import static edu.cnm.deepdive.codebreaker.controller.MatchController.RELATIVE_PATH;
+
 import edu.cnm.deepdive.codebreaker.model.entity.Game;
 import edu.cnm.deepdive.codebreaker.model.entity.Match;
 import edu.cnm.deepdive.codebreaker.model.entity.User;
 import edu.cnm.deepdive.codebreaker.service.MatchService;
+import edu.cnm.deepdive.codebreaker.service.MatchService.MatchNotFoundException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -19,9 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/matches")
+@RequestMapping(RELATIVE_PATH)
 @ExposesResourceFor(Match.class)
 public class MatchController {
+
+  static final String RELATIVE_PATH = "/matches";
 
   private final MatchService matchService;
 
@@ -36,16 +42,16 @@ public class MatchController {
     return matchService.startMatch(match, (User) auth.getPrincipal());
   }
 
-  @GetMapping(value = "/{matchId}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public Match get(@PathVariable UUID matchId) {
-    return matchService.get(matchId)
-        .orElseThrow(NoSuchElementException::new);
+  @GetMapping(value = UUID_PATH_PARAMETER_PATTERN, produces = MediaType.APPLICATION_JSON_VALUE)
+  public Match get(@PathVariable UUID id) {
+    return matchService.get(id)
+        .orElseThrow(MatchNotFoundException::new);
   }
 
-  @GetMapping(value = "/{matchId}/games", produces = MediaType.APPLICATION_JSON_VALUE)
-  public List<Game> getGames(@PathVariable UUID matchId) {
-    return matchService.getGames(matchId)
-        .orElseThrow(NoSuchElementException::new);
-  }
+//  @GetMapping(value = "/{matchId}/games", produces = MediaType.APPLICATION_JSON_VALUE)
+//  public List<Game> getGames(@PathVariable UUID matchId) {
+//    return matchService.getGames(matchId)
+//        .orElseThrow(MatchNotFoundException::new);
+//  }
 
 }

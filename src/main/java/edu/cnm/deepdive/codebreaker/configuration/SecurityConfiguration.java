@@ -1,11 +1,11 @@
 package edu.cnm.deepdive.codebreaker.configuration;
 
-import edu.cnm.deepdive.codebreaker.service.UserService;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,7 +23,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 @EnableWebSecurity
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-  private final UserService userService;
+  private final Converter converter;
 
   @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}")
   private String issuerUri;
@@ -32,8 +32,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   private String clientId;
 
   @Autowired
-  public SecurityConfiguration(UserService userService) {
-    this.userService = userService;
+  public SecurityConfiguration(Converter converter) {
+    this.converter = converter;
   }
 
   @Override
@@ -41,7 +41,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     http
         .authorizeRequests((auth) -> auth.anyRequest().authenticated())
         .oauth2ResourceServer().jwt()
-        .jwtAuthenticationConverter(userService);
+        .jwtAuthenticationConverter(converter);
   }
 
   @Bean

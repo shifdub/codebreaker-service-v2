@@ -1,7 +1,6 @@
 package edu.cnm.deepdive.codebreaker.configuration;
 
 import java.util.NoSuchElementException;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
